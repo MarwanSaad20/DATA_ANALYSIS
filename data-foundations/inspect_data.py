@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # =========================
 # Load Data
@@ -8,42 +7,72 @@ file_path = r"C:\Data_Analysis\data-foundations\data\sales.csv"
 df = pd.read_csv(file_path)
 
 # =========================
-# Basic Structure Check
+# Quick Overview
 # =========================
-print("Rows:", df.shape[0])
-print("Columns:", df.shape[1])
-print(df.head())
+print("=== Data Preview ===")
+print(df.head(), "\n")
+
+print("=== Data Shape ===")
+print(f"Rows: {df.shape[0]}, Columns: {df.shape[1]}\n")
 
 # =========================
-# Detect Data Limitations
+# Data Types Inspection
 # =========================
-print("\nMissing Values:")
-print(df.isnull().sum())
+print("=== Raw Data Types ===")
+print(df.dtypes, "\n")
 
-print("\nUnique Values per Column:")
+# =========================
+# Analytical Classification
+# =========================
+data_classification = {}
+
 for col in df.columns:
-    print(col, ":", df[col].nunique())
+    dtype = df[col].dtype
+
+    if pd.api.types.is_numeric_dtype(dtype):
+        data_classification[col] = "Numerical"
+    elif pd.api.types.is_datetime64_any_dtype(dtype):
+        data_classification[col] = "Date/Time"
+    else:
+        data_classification[col] = "Categorical / Text"
+
+print("=== Analytical Column Classification ===")
+for column, classification in data_classification.items():
+    print(f"- {column}: {classification}")
+
+
+import pandas as pd
+
+# Load data
+file_path = r"C:\Data_Analysis\data-foundations\data\sales.csv"
+df = pd.read_csv(file_path)
 
 # =========================
-# Visualization: Sales by Product
+# Basic Overview
 # =========================
-sales_by_product = df.groupby("Product")["Quantity"].sum()
-sales_by_product.plot(kind="bar")
-plt.title("Sales Distribution by Product")
-plt.xlabel("Product")
-plt.ylabel("Total Quantity Sold")
-plt.tight_layout()
-plt.savefig("sales_by_product.png")
-plt.show()
+print("=== Data Preview ===")
+print(df.head(), "\n")
 
 # =========================
-# Visualization: Sales by Region
+# Check Missing Values
 # =========================
-sales_by_region = df.groupby("Region")["Quantity"].sum()
-sales_by_region.plot(kind="bar")
-plt.title("Sales Distribution by Region")
-plt.xlabel("Region")
-plt.ylabel("Total Quantity Sold")
-plt.tight_layout()
-plt.savefig("sales_by_region.png")
-plt.show()
+missing_counts = df.isnull().sum()
+print("=== Missing Values ===")
+print(missing_counts, "\n")
+
+# =========================
+# Check Duplicate Rows
+# =========================
+duplicates = df.duplicated().sum()
+print(f"Duplicate Rows: {duplicates}\n")
+
+# =========================
+# Check Basic Stats
+# =========================
+print("=== Basic Statistics ===")
+print(df.describe(include='all'), "\n")
+
+# =========================
+# Optional: Detect Potential Biases
+for col in df.columns:
+    print(f"{col} unique values count: {df[col].nunique()}")
