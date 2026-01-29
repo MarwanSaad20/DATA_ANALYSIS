@@ -1,4 +1,8 @@
-=== Total Sales by Product ===
+##############################
+## DAY 4 – SQL FOUNDATIONS ##
+##############################
+
+=== Day 4 | Total Sales by Product ===
 ('Laptop', 13740)
 ('Phone', 12185)
 ('Tablet', 5330)
@@ -6,30 +10,102 @@
 ('Keyboard', 1473)
 ('Mouse', 1010)
 
-=== Sales by Region ===
+=== Day 4 | Sales by Region ===
 ('North', 13161)
 ('South', 10556)
 ('East', 7382)
 ('West', 7334)
 
-=== Top Orders (>500) ===
-(1001, 'Laptop', 2, 900, 1800)
-(1002, 'Phone', 5, 600, 3000)
-(1003, 'Tablet', 3, 400, 1200)
-(1004, 'Monitor', 4, 250, 1000)
-(1007, 'Laptop', 1, 950, 950)
-(1008, 'Phone', 4, 620, 2480)
-(1009, 'Tablet', 2, 420, 840)
-(1010, 'Monitor', 3, 260, 780)
-(1013, 'Laptop', 3, 920, 2760)
+=== Day 4 | High Value Orders (>500) ===
+(1025, 'Laptop', 7, 910, 6370)
 (1014, 'Phone', 6, 610, 3660)
-(1015, 'Tablet', 4, 410, 1640)
-(1016, 'Monitor', 2, 255, 510)
+(1002, 'Phone', 5, 600, 3000)
+(1013, 'Laptop', 3, 920, 2760)
+(1008, 'Phone', 4, 620, 2480)
 (1019, 'Laptop', 2, 930, 1860)
 (1020, 'Phone', 3, 605, 1815)
+(1001, 'Laptop', 2, 900, 1800)
+(1015, 'Tablet', 4, 410, 1640)
 (1022, 'Monitor', 5, 265, 1325)
-(1025, 'Laptop', 7, 910, 6370)
-(1026, 'Phone', 2, 615, 1230)
 (1027, 'Tablet', 3, 415, 1245)
+(1026, 'Phone', 2, 615, 1230)
+(1003, 'Tablet', 3, 400, 1200)
 (1028, 'Monitor', 4, 270, 1080)
+(1004, 'Monitor', 4, 250, 1000)
+(1007, 'Laptop', 1, 950, 950)
+(1009, 'Tablet', 2, 420, 840)
+(1010, 'Monitor', 3, 260, 780)
+(1016, 'Monitor', 2, 255, 510)
 
+
+
+##############################
+## DAY 5 – STRATEGIC SQL ANALYTICS ##
+##############################
+
+
+--- Executing: data_quality_metrics.sql ---
+
+--- Executing: day5_full_analysis.sql ---
+[ERROR] near ".": syntax error
+
+--- Executing: descriptive_analysis.sql ---
+('Laptop', 13740)
+('Phone', 12185)
+('Tablet', 5330)
+('Monitor', 4695)
+('Keyboard', 1473)
+('Mouse', 1010)
+('Tablet', 5)
+('Phone', 5)
+('Mouse', 5)
+('Monitor', 5)
+('Laptop', 5)
+('Keyboard', 5)
+
+--- Executing: ranking_analysis.sql ---
+('Laptop', 13740)
+('Phone', 12185)
+('Tablet', 5330)
+('North', 13161)
+('South', 10556)
+('East', 7382)
+('West', 7334)
+
+--- Executing: strategic_insights.sql ---
+(1025, 'Laptop', 6370)
+(1014, 'Phone', 3660)
+(1002, 'Phone', 3000)
+(1013, 'Laptop', 2760)
+(1008, 'Phone', 2480)
+(1019, 'Laptop', 1860)
+(1020, 'Phone', 1815)
+(1001, 'Laptop', 1800)
+(1015, 'Tablet', 1640)
+(1022, 'Monitor', 1325)
+(1027, 'Tablet', 1245)
+(1026, 'Phone', 1230)
+(1003, 'Tablet', 1200)
+(1028, 'Monitor', 1080)
+(1004, 'Monitor', 1000)
+(1007, 'Laptop', 950)
+(1009, 'Tablet', 840)
+(1010, 'Monitor', 780)
+(1016, 'Monitor', 510)
+(1017, 'Keyboard', 416)
+(1021, 'Tablet', 405)
+(1005, 'Keyboard', 300)
+(1018, 'Mouse', 288)
+(1011, 'Keyboard', 275)
+(1029, 'Keyboard', 270)
+(1012, 'Mouse', 245)
+(1006, 'Mouse', 240)
+(1023, 'Keyboard', 212)
+(1024, 'Mouse', 204)
+(1030, 'Mouse', 33)
+('Tablet', 5, 5330)
+('Phone', 5, 12185)
+('Mouse', 5, 1010)
+('Monitor', 5, 4695)
+('Laptop', 5, 13740)
+('Keyboard', 5, 1473)
