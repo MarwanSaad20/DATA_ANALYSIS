@@ -7,25 +7,27 @@ from cleaning.cleaning import run_cleaning
 from features.features import run_features
 from analysis.analysis import run_analysis
 
+# NEW: SQL analytics layer
+from analysis.run_sql_layer import main as run_sql_layer
+
+
 # ========================
 # Logger configuration
 # ========================
 dss_logger = logging.getLogger('dss_logger')
 dss_logger.setLevel(logging.INFO)
 
-# Console handler لإظهار الرسائل على الشاشة
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging.INFO)
 
-# Formatter بسيط للعرض
 formatter = logging.Formatter(
     "[%(asctime)s] [%(levelname)s] [%(stage)s] [%(run_id)s] [%(function)s] %(message)s"
 )
 console_handler.setFormatter(formatter)
 
-# إضافة الـ handler للـ logger إذا لم يكن موجوداً
 if not dss_logger.handlers:
     dss_logger.addHandler(console_handler)
+
 
 # ========================
 # Main pipeline
@@ -35,9 +37,9 @@ if __name__ == "__main__":
     Main entry point for the pipeline. Orchestrates execution of all stages in strict sequential order,
     passes correlation_id for traceability, handles errors globally, and ensures complete logging.
     """
+
     correlation_id = str(uuid.uuid4())
 
-    # Log pipeline start
     dss_logger.info(
         "Pipeline started",
         extra={
@@ -135,7 +137,7 @@ if __name__ == "__main__":
         )
 
         # ========================
-        # Stage 4: Analysis
+        # Stage 4: Analysis (Python layer)
         # ========================
         dss_logger.info(
             "Analysis stage started",
@@ -161,7 +163,40 @@ if __name__ == "__main__":
             }
         )
 
-        # Log pipeline success
+        # ========================
+        # Stage 5: SQL Analytics Layer (Week 2)
+        # ========================
+        dss_logger.info(
+            "SQL analytics stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SQL_ANALYTICS",
+                "function": "run_sql_layer",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+
+        # run_sql_layer currently does not consume pipeline dict,
+        # it operates on processed CSVs (features outputs)
+        run_sql_layer()
+
+        dss_logger.info(
+            "SQL analytics stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SQL_ANALYTICS",
+                "function": "run_sql_layer",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Pipeline success
+        # ========================
         dss_logger.info(
             "Pipeline completed successfully",
             extra={
