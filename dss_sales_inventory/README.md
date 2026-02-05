@@ -1,16 +1,11 @@
-تمام مروان، سأعد لك نسخة **محدثة كاملة من README.md** تعكس الهيكل الفعلي للمشروع الحالي بعد الأسبوع الثالث، مع توضيح **الملفات القديمة والجديدة** في `reporting/outputs` حتى لا يحدث أي التباس لمطور جديد.
 
----
-
-```markdown
 # Decision Support System for Sales & Inventory
 
-نظام دعم قرار للمبيعات والمخزون – الإصدار 1.5 (أسبوع 1 + 2 + 3)
+نظام دعم قرار للمبيعات والمخزون – الإصدار 1.6 (أسبوع 1 + 2 + 3 + 4)
 
 ## نظرة عامة
 نظام يحول البيانات الخام إلى بيانات جاهزة للتحليل، مع دعم قرارات المخزون والتسعير قصيرة المدى.  
-يستخدم dict لتمرير البيانات بين المراحل مع correlation_id لتتبع كل run.  
-الأسبوع الثاني والثالث أضافا SQL layer لتحليلات متقدمة مع Views لحظية لتعزيز سرعة اتخاذ القرار.
+الأسبوع الرابع أضاف **تحليل السلاسل الزمنية (Time Series Analysis)** لكل المنتجات، مع استخراج **توصيات لكل منتج** وحفظ **CSV summary** ورسوم بيانية لكل منتج وأيضًا رسم شامل لجميع المنتجات.
 
 ## هيكل المجلدات
 ```
@@ -34,20 +29,20 @@ dss_sales_inventory/
 │   ├─ analysis.py
 │   ├─ run_sql_layer.py       # SQL analytics layer runner
 │   ├─ analytics.db           # SQLite database لتخزين نتائج SQL
-│   └─ sql/
-│       ├─ advanced_analysis.sql
-│       └─ views.sql          # الأسبوع الثالث: Views لحظية
+│   └─ time_series/
+│       ├─ time_series_analysis.py   # الأسبوع الرابع: Time Series Analysis
+│       ├─ trend_insights.md        # Markdown report
+│       └─ **pycache**/
 │
 ├─ reporting/
 │   └─ outputs/
-│       ├─ analysis_summary.csv
-│       ├─ product_performance_view.csv  # جديد الأسبوع الثالث
-│       ├─ demand_pressure_view.csv      # جديد الأسبوع الثالث
-│       ├─ inventory_status_view.csv     # جديد الأسبوع الثالث
-│       ├─ plots/
-│           ├─ histogram_daily_quantity.png
-│           └─ trend_daily_revenue.png
-│       ├─ (ملفات قديمة غير مستخدمة: product_performance.csv, demand_pressure.csv, inventory_pressure.csv)
+│       ├─ product_performance_view.csv
+│       ├─ demand_pressure_view.csv
+│       ├─ inventory_status_view.csv
+│       ├─ time_series_summary.csv    # الأسبوع الرابع: CSV summary
+│       └─ plots/
+│           ├─ combined_all_products_trend.png
+│           ├─ trend_product_XX.png (لكل منتج محدد في التحليل)
 │
 ├─ logs/                     # pipeline_{run_id}.log
 ├─ pipeline.py
@@ -71,6 +66,10 @@ Features → featured dict + daily features + CSVs
 │
 ▼
 Analysis → summary CSV + plots
+│      └─ Time Series Analysis (أسبوع 4)
+│         ├─ trend_insights.md
+│         ├─ time_series_summary.csv
+│         └─ plots (رسوم لكل منتج + رسم شامل)
 │
 ▼
 SQL Analytics → SQLite (analytics.db) + CSV outputs (Views لحظية)
@@ -95,7 +94,7 @@ graph TD
 ## المتطلبات
 
 * Python 3.9+
-* pandas, matplotlib, seaborn, uuid, sqlite3 (لـ SQL layer)
+* pandas, matplotlib, seaborn, uuid, sqlite3
 
 ## تعليمات التشغيل
 
@@ -103,13 +102,25 @@ graph TD
 2. شغل من جذر المشروع: `python pipeline.py`
 3. تحقق من logs (يحتوي correlation_id لكل run)
 4. بعد التشغيل، النتائج الجديدة موجودة في: `reporting/outputs/`
+   **يشمل ذلك:**
+
+   * CSV summary لكل منتج (`time_series_summary.csv`)
+   * Markdown report (`trend_insights.md`)
+   * Plots فردية لكل منتج + رسم شامل لجميع المنتجات
 
 ## المراحل والمخرجات
 
 * **Ingestion**: تحميل + dict أولي
 * **Cleaning**: تنظيف + referential checks
 * **Features**: daily aggregation + stock_ratio
-* **Analysis**: إحصاءات + رسوم
+* **Analysis**:
+
+  * إحصاءات + رسوم لكل منتج
+  * **Time Series Analysis (أسبوع 4)**:
+
+    * الكشف عن الاتجاه (Trend) لكل منتج: Up / Down / Stable
+    * توليد توصية ذكية بناءً على المخزون والطلب
+    * حفظ CSV summary + Plots فردية + رسم شامل لجميع المنتجات
 * **SQL Analytics (أسبوع 2 + 3)**:
 
   * `advanced_analysis.sql`: المنطق الأساسي باستخدام CTEs
@@ -118,7 +129,6 @@ graph TD
     * **product_performance_view**: متوسط المبيعات اليومية، الإيراد اليومي، performance_score
     * **demand_pressure_view**: نسبة المبيعات اليومية إلى المخزون المتاح، مستوى ضغط الطلب
     * **inventory_status_view**: stock_ratio مقارنة بـ reorder_point، حالة المخزون (safe/risk/critical)
-  * النتائج تُصدر CSV مباشرة و تُخزن في SQLite db (analytics.db)
 
 ## التوسع المستقبلي
 
@@ -132,15 +142,8 @@ graph TD
 * كل دالة unit-testable
 * SQL layer يستخدم CTEs و subqueries لتحليلات متقدمة
 * ملفات CSV القديمة موجودة فقط للتوافق مع الإصدار القديم (يمكن حذفها لاحقًا)
+* Time Series Analysis مدمج الآن مع التوصيات لكل منتج وتصدير CSV
 
 ```
 
 ---
-
-✅ **هذا التحديث يعكس:**
-1. جميع الملفات الحالية كما في شجرة المشروع.  
-2. توضيح الملفات القديمة مقابل الملفات الجديدة (Views الأسبوع الثالث).  
-3. SQL layer الجديد والأسبوع الثالث مدمج بشكل كامل في README.  
-
----
-
