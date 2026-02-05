@@ -1,0 +1,11 @@
+product_id,trend,avg_value,last_value,demand_level,current_stock,reorder_point,inventory_status,recommendation
+12,stable,8.54,8.54,Normal,90,47,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 90 (vs reorder 47). Status: Safe. **Recommendation: Maintain current stocking policy.**
+30,stable,8.26,8.26,Normal,66,30,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 66 (vs reorder 30). Status: Safe. **Recommendation: Maintain current stocking policy.**
+27,stable,8.19,8.19,Normal,155,57,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 155 (vs reorder 57). Status: Safe. **Recommendation: Maintain current stocking policy.**
+53,stable,8.15,8.15,Normal,138,60,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 138 (vs reorder 60). Status: Safe. **Recommendation: Maintain current stocking policy.**
+41,stable,8.14,8.14,Normal,119,42,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 119 (vs reorder 42). Status: Safe. **Recommendation: Maintain current stocking policy.**
+20,stable,8.12,8.12,Normal,26,21,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 26 (vs reorder 21). Status: Safe. **Recommendation: Maintain current stocking policy.**
+49,stable,8.11,8.11,Normal,57,44,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 57 (vs reorder 44). Status: Safe. **Recommendation: Maintain current stocking policy.**
+68,stable,8.05,8.05,Normal,91,60,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 91 (vs reorder 60). Status: Safe. **Recommendation: Maintain current stocking policy.**
+42,stable,7.99,7.99,Normal,97,42,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 97 (vs reorder 42). Status: Safe. **Recommendation: Maintain current stocking policy.**
+78,stable,7.95,7.95,Normal,84,30,Safe,STABLE trend in avg_daily_sales. Stable pattern (Level: Normal). Current stock: 84 (vs reorder 30). Status: Safe. **Recommendation: Maintain current stocking policy.**

@@ -89,6 +89,7 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
 
     PLOTS_DIR = ROOT / 'reporting' / 'outputs' / 'plots'
     REPORT_PATH = ROOT / 'analysis' / 'time_series' / 'trend_insights.md'
+    CSV_PATH = ROOT / 'reporting' / 'outputs' / 'time_series_summary.csv'
 
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -107,7 +108,6 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
             perf_df.groupby('product_id').cumcount(), unit='D'
         )
     perf_df = perf_df.sort_values(['product_id', 'date']).reset_index(drop=True)
-
     perf_df = calculate_rolling_mean(perf_df, value_col, rolling_window)
 
     trends = {"up": 0, "down": 0, "stable": 0}
@@ -132,12 +132,11 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
         data = perf_df[perf_df['product_id'] == pid]
         color = next(color_cycle)
         marker = next(marker_cycle)
-        plt.plot(data['date'], data[value_col], label=f'Product {pid} (Observed)', color=color, marker=marker, linestyle='-', alpha=0.6)
-        plt.plot(data['date'], data['rolling_mean'], label=f'Product {pid} (Rolling)', color=color, linestyle='--', alpha=0.5)
+        plt.plot(data['date'], data[value_col], color=color, alpha=0.6)
+        plt.plot(data['date'], data['rolling_mean'], color=color, linestyle='--', alpha=0.5)
     plt.title(f"Combined Trends - All Products by {value_col}")
     plt.xlabel("Date (Synthetic Index)")
     plt.ylabel(value_col)
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     combined_path = PLOTS_DIR / "combined_all_products_trend.png"
@@ -153,8 +152,8 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
     # ========================
     # Individual Product Analysis (Sample Top Products)
     # ========================
-    # اختيار أعلى المنتجات حسب متوسط القيمة
     top_products = perf_df.groupby('product_id')[value_col].mean().nlargest(max_sample_products).index
+    summary_list = []
 
     color_cycle = itertools.cycle(colors)
     marker_cycle = itertools.cycle(markers)
@@ -168,9 +167,30 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
 
         avg_value = product_data[value_col].mean()
         last_value = product_data[value_col].iloc[-1]
-
         insight = generate_insight(pid, trend, demand_df, inventory_df, value_col)
 
+        # جمع بيانات CSV
+        demand_row = demand_df[demand_df['product_id'] == pid]
+        inventory_rows = inventory_df[inventory_df['product_id'] == pid]
+        inventory_row = inventory_rows.iloc[-1] if not inventory_rows.empty else pd.Series()
+        demand_level = demand_row['demand_pressure_level'].iloc[-1] if not demand_row.empty and 'demand_pressure_level' in demand_row.columns else "N/A"
+        current_stock = inventory_row.get('stock_on_hand', 'N/A')
+        reorder_point = inventory_row.get('reorder_point', 'N/A')
+        inventory_status = inventory_row.get('inventory_status', 'N/A')
+
+        summary_list.append({
+            "product_id": pid,
+            "trend": trend,
+            "avg_value": avg_value,
+            "last_value": last_value,
+            "demand_level": demand_level,
+            "current_stock": current_stock,
+            "reorder_point": reorder_point,
+            "inventory_status": inventory_status,
+            "recommendation": insight
+        })
+
+        # الرسم الفردي
         color = colors[i % len(colors)]
         marker = markers[i % len(markers)]
 
@@ -199,6 +219,13 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
             f"![Product {pid} Trend]({plot_path.relative_to(ROOT)})\n\n",
             "---\n\n"
         ])
+
+    # ========================
+    # Export CSV Summary
+    # ========================
+    summary_df = pd.DataFrame(summary_list)
+    summary_df.to_csv(CSV_PATH, index=False, encoding='utf-8')
+    print(f"CSV summary saved to: {CSV_PATH}")
 
     # ========================
     # Executive Summary
