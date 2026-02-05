@@ -1,14 +1,18 @@
 import uuid
 import logging
 import sys
+from pathlib import Path
 
 from ingestion.ingestion import run_ingestion
 from cleaning.cleaning import run_cleaning
 from features.features import run_features
 from analysis.analysis import run_analysis
 
-# NEW: SQL analytics layer
+# SQL analytics layer
 from analysis.run_sql_layer import main as run_sql_layer
+
+# Time Series Analysis
+from analysis.time_series.time_series_analysis import main as run_time_series_analysis
 
 
 # ========================
@@ -33,11 +37,6 @@ if not dss_logger.handlers:
 # Main pipeline
 # ========================
 if __name__ == "__main__":
-    """
-    Main entry point for the pipeline. Orchestrates execution of all stages in strict sequential order,
-    passes correlation_id for traceability, handles errors globally, and ensures complete logging.
-    """
-
     correlation_id = str(uuid.uuid4())
 
     dss_logger.info(
@@ -164,7 +163,7 @@ if __name__ == "__main__":
         )
 
         # ========================
-        # Stage 5: SQL Analytics Layer (Week 2)
+        # Stage 5: SQL Analytics Layer (Week 2+3)
         # ========================
         dss_logger.info(
             "SQL analytics stage started",
@@ -177,17 +176,44 @@ if __name__ == "__main__":
                 "status": "STARTED"
             }
         )
-
-        # run_sql_layer currently does not consume pipeline dict,
-        # it operates on processed CSVs (features outputs)
         run_sql_layer()
-
         dss_logger.info(
             "SQL analytics stage completed",
             extra={
                 "run_id": correlation_id,
                 "stage": "SQL_ANALYTICS",
                 "function": "run_sql_layer",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage 6: Time Series Analysis (Week 4)
+        # ========================
+        dss_logger.info(
+            "Time Series Analysis stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "TIME_SERIES",
+                "function": "run_time_series_analysis",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+
+        # FIX: Pass only root_dir
+        ROOT_DIR = r"C:\Data_Analysis\dss_sales_inventory"
+        run_time_series_analysis(root_dir=ROOT_DIR)
+
+        dss_logger.info(
+            "Time Series Analysis stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "TIME_SERIES",
+                "function": "run_time_series_analysis",
                 "rows_in": None,
                 "rows_out": None,
                 "status": "SUCCESS"
