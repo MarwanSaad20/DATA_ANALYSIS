@@ -16,12 +16,17 @@ dss_logger = logging.getLogger("dss_logger")
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 
+# ملف الـ View يبقى في مجلد الإخراج الرئيسي
 VIEW_PATH = os.path.join(PROJECT_ROOT, "reporting", "outputs", "daily_product_sales_view.csv")
-FORECAST_OUTPUT_PATH = os.path.join(PROJECT_ROOT, "reporting", "outputs", "forecast_results.csv")
-EVAL_MD_PATH = os.path.join(PROJECT_ROOT, "analysis", "forecast", "forecast_evaluation.md")
-FORECAST_DIR = os.path.join(PROJECT_ROOT, "analysis", "forecast")
 
-os.makedirs(os.path.dirname(FORECAST_OUTPUT_PATH), exist_ok=True)
+# تعديل مكان إخراج ملف النتائج ليكون داخل مجلد الطبقة forecast
+FORECAST_DIR = os.path.join(PROJECT_ROOT, "analysis", "forecast")
+FORECAST_OUTPUT_PATH = os.path.join(FORECAST_DIR, "forecast_results.csv")
+
+# ملف تقرير التقييم يبقى كما هو داخل الطبقة
+EVAL_MD_PATH = os.path.join(FORECAST_DIR, "forecast_evaluation.md")
+
+# إنشاء المجلدات اللازمة
 os.makedirs(FORECAST_DIR, exist_ok=True)
 
 # ------------------------------------------------------------------
@@ -199,15 +204,17 @@ def run_short_term_forecast(correlation_id: str) -> None:
             log_message(f"Soft-fail for product {product_id}: {str(e)}", "WARNING", correlation_id)
             continue
 
-    # كتابة النتائج
+    # كتابة النتائج داخل طبقة forecast
     if results_dfs:
         final_results = pd.concat(results_dfs, ignore_index=True)
         final_results.to_csv(FORECAST_OUTPUT_PATH, index=False)
+        print(f"تم حفظ ملف النتائج هنا: {FORECAST_OUTPUT_PATH}")
         log_message(f"Forecast results saved to {FORECAST_OUTPUT_PATH}", "INFO", correlation_id)
     else:
+        print("لم تتم معالجة أي منتجات - ملف forecast_results.csv لن يتم إنشاؤه")
         log_message("No products processed - forecast_results.csv not created", "WARNING", correlation_id)
 
-    # كتابة تقرير التقييم (يبقى كما هو)
+    # كتابة تقرير التقييم
     with open(EVAL_MD_PATH, "w", encoding="utf-8") as f:
         f.write("# Short-Term Forecast Evaluation Report\n\n")
         f.write("## Processed Products\n\n")

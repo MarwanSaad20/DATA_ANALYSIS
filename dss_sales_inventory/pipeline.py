@@ -17,6 +17,11 @@ from analysis.time_series.time_series_analysis import main as run_time_series_an
 # Short-Term Forecast Layer (Week 5)
 from analysis.forecast.short_term_forecast import run_short_term_forecast
 
+# Scenario Analysis Layer (Week 6)
+from analysis.scenarios.scenario_analysis import run_scenario_analysis
+
+# Risk Simulation Layer (Week 7)
+from analysis.risk.risk_simulation import run_risk_simulation
 
 
 # ========================
@@ -245,6 +250,60 @@ if __name__ == "__main__":
                 "run_id": correlation_id,
                 "stage": "SHORT_TERM_FORECAST",
                 "function": "run_short_term_forecast",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage 8: Scenario Analysis Layer (Week 6)
+        # ========================
+        dss_logger.info(
+            "Scenario Analysis stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SCENARIO_ANALYSIS",
+                "function": "run_scenario_analysis",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+        run_scenario_analysis(correlation_id)
+        dss_logger.info(
+            "Scenario Analysis stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SCENARIO_ANALYSIS",
+                "function": "run_scenario_analysis",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage 9: Risk Simulation Layer (Week 7)
+        # ========================
+        dss_logger.info(
+            "Risk Simulation stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "RISK_SIMULATION",
+                "function": "run_risk_simulation",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+        run_risk_simulation(correlation_id)
+        dss_logger.info(
+            "Risk Simulation stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "RISK_SIMULATION",
+                "function": "run_risk_simulation",
                 "rows_in": None,
                 "rows_out": None,
                 "status": "SUCCESS"

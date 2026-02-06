@@ -1,5 +1,3 @@
-# C:\Data_Analysis\dss_sales_inventory\analysis\time_series\time_series_analysis.py
-
 import os
 import pandas as pd
 import matplotlib
@@ -89,7 +87,9 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
 
     PLOTS_DIR = ROOT / 'reporting' / 'outputs' / 'plots'
     REPORT_PATH = ROOT / 'analysis' / 'time_series' / 'trend_insights.md'
-    CSV_PATH = ROOT / 'reporting' / 'outputs' / 'time_series_summary.csv'
+
+    # تعديل مكان حفظ CSV ليكون داخل الطبقة time_series
+    CSV_PATH = ROOT / 'analysis' / 'time_series' / 'time_series_summary.csv'
 
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -221,7 +221,7 @@ def main(root_dir: str, rolling_window: int = 7, max_sample_products: int = 10):
         ])
 
     # ========================
-    # Export CSV Summary
+    # Export CSV Summary داخل time_series
     # ========================
     summary_df = pd.DataFrame(summary_list)
     summary_df.to_csv(CSV_PATH, index=False, encoding='utf-8')
