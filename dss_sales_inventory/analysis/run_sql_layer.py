@@ -14,11 +14,13 @@ OUTPUT_DIR = BASE / "reporting" / "outputs"
 
 def load_tables(conn):
     """تحميل الجداول من CSV إلى قاعدة البيانات"""
-    sales = pd.read_csv(DATA / "sales_features.csv")
-    inventory = pd.read_csv(DATA / "inventory_features.csv")
+    sales_clean = pd.read_csv(DATA / "sales_cleaned.csv")
+    sales_features = pd.read_csv(DATA / "sales_features.csv")
+    inventory_features = pd.read_csv(DATA / "inventory_features.csv")
 
-    sales.to_sql("sales_features", conn, if_exists="replace", index=False)
-    inventory.to_sql("inventory_features", conn, if_exists="replace", index=False)
+    sales_clean.to_sql("sales_clean", conn, if_exists="replace", index=False)
+    sales_features.to_sql("sales_features", conn, if_exists="replace", index=False)
+    inventory_features.to_sql("inventory_features", conn, if_exists="replace", index=False)
 
 
 def run_sql_file(conn, sql_file):
@@ -66,7 +68,7 @@ def export_views_as_csv(conn, view_names, output_dir):
 def main():
     conn = sqlite3.connect(DB_FILE)
 
-    # تحميل الجداول
+    # تحميل الجداول (أضفنا sales_cleaned)
     load_tables(conn)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -85,15 +87,16 @@ def main():
         results[2].to_csv(OUTPUT_DIR / "inventory_pressure.csv", index=False)
 
     # -----------------------------
-    # تشغيل views.sql
+    # تشغيل views.sql (الذي يحتوي الآن على الـ View الجديد)
     # -----------------------------
     run_sql_file(conn, VIEWS_SQL_FILE)
 
-    # تصدير كل View كـ CSV منفصل
+    # تصدير كل View كـ CSV منفصل (أضفنا daily_product_sales_view)
     view_names = [
         "product_performance_view",
         "demand_pressure_view",
-        "inventory_status_view"
+        "inventory_status_view",
+        "daily_product_sales_view"
     ]
     export_views_as_csv(conn, view_names, OUTPUT_DIR)
 

@@ -14,6 +14,10 @@ from analysis.run_sql_layer import main as run_sql_layer
 # Time Series Analysis
 from analysis.time_series.time_series_analysis import main as run_time_series_analysis
 
+# Short-Term Forecast Layer (Week 5)
+from analysis.forecast.short_term_forecast import run_short_term_forecast
+
+
 
 # ========================
 # Logger configuration
@@ -214,6 +218,33 @@ if __name__ == "__main__":
                 "run_id": correlation_id,
                 "stage": "TIME_SERIES",
                 "function": "run_time_series_analysis",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage 7: Short-Term Forecast Layer (Week 5)
+        # ========================
+        dss_logger.info(
+            "Short-Term Forecast stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SHORT_TERM_FORECAST",
+                "function": "run_short_term_forecast",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+        run_short_term_forecast(correlation_id)
+        dss_logger.info(
+            "Short-Term Forecast stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SHORT_TERM_FORECAST",
+                "function": "run_short_term_forecast",
                 "rows_in": None,
                 "rows_out": None,
                 "status": "SUCCESS"

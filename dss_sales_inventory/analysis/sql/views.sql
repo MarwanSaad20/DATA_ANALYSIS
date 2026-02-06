@@ -58,3 +58,16 @@ SELECT
     END AS inventory_status,
     ROUND(stock_ratio,2) AS stock_ratio
 FROM inventory_features;
+
+-- =========================================
+-- 4. Daily Product Sales View (جديد للـ Short-Term Forecast)
+-- =========================================
+DROP VIEW IF EXISTS daily_product_sales_view;
+
+CREATE VIEW daily_product_sales_view AS
+SELECT
+    product_id,
+    DATE(date) AS date,        -- تم التصحيح: العمود الموجود فعلياً في CSV هو date
+    SUM(quantity) AS quantity_sold
+FROM sales_clean
+GROUP BY product_id, DATE(date);
