@@ -3,9 +3,9 @@
 
 | **Document Meta** | **Details** |
 | --- | --- |
-| **Version** | **3.2** (Final Production Release) |
-| **Last Updated** | **February 7, 2026** |
-| **Status** | **Production Ready** (Modules 1–7 Implemented) |
+| **Version** | **3.3** (Final Production Release) |
+| **Last Updated** | **February 10, 2026** |
+| **Status** | **Production Ready** (Modules 1–8 Implemented) |
 | **Root Directory** | `C:\Data_Analysis\dss_sales_inventory\` |
 | **Target Audience** | Data Engineers, AI Agents, System Architects |
 
@@ -20,20 +20,21 @@
 | **2.4** | Feb 2026 | Core Team | Added Prescriptive Layer (Week 6: Scenarios) and Operational Protocols. |
 | **3.0** | Feb 2026 | AI Architect | Enhanced formatting, operational protocols, and formula specifications. |
 | **3.1** | Feb 2026 | AI Architect | Added **Risk Simulation Layer (Week 7)** and probabilistic reporting. |
-| **3.2** | Feb 2026 | AI Architect | **Final Synchronization:** Verified all file paths, expanded QA checklists for data integrity, added step-by-step formula examples, and finalized the pipeline diagram. |
+| **3.2** | Feb 2026 | AI Architect | **Synchronization:** Verified paths, QA checklists, and pipeline logic. |
+| **3.3** | Feb 2026 | AI Architect | Added **Sensitivity Analysis Layer (Week 8)** including outputs, visualizations, pipeline integration, and QA checklist. |
 
 ---
 
 ## 2. Executive Summary & Architecture
 
-The Decision Support System (DSS) is a modular analytics engine designed to ingest raw sales and inventory data, process it through a multi-stage pipeline, and deliver actionable insights. The system transitions from **Descriptive Analysis** (historical view) to **Prescriptive Analysis** (strategic simulation) and **Probabilistic Risk Assessment** (uncertainty quantification).
+The Decision Support System (DSS) is a modular analytics engine designed to ingest raw sales and inventory data, process it through a multi-stage pipeline, and deliver actionable insights. The system transitions from **Descriptive Analysis** (historical view) to **Prescriptive Analysis** (strategic simulation), **Probabilistic Risk Assessment**, and finally **Sensitivity Analysis** (robustness testing).
 
 ### 2.1 Core Architectural Principles
 
 1. **Dict-Passing Architecture:** State is managed by passing a Python dictionary (`data = {'sales': df, 'inventory': df}`) between functions, ensuring statelessness and high testability.
 2. **Traceability:** A unique `correlation_id` (UUID) is generated at the pipeline's initialization and propagated through every log entry and transformation step (See **Section 6.1** for Logging Standards).
 3. **Immutability:** Raw data in `data/raw` is read-only. All transformations result in new artifacts stored in `data/processed` or `analysis/`.
-4. **Modularity:** Each analytical stage (SQL, Time Series, Forecast, Scenarios, Risk) functions as an independent unit, executable via the main orchestrator or standalone for debugging.
+4. **Modularity:** Each analytical stage (SQL, Time Series, Forecast, Scenarios, Risk, Sensitivity) functions as an independent unit, executable via the main orchestrator or standalone for debugging.
 
 ### 2.2 Project Directory Tree
 
@@ -63,6 +64,15 @@ C:\DATA_ANALYSIS\DSS_SALES_INVENTORY
 |   |       scenarios_comparison.xlsx
 |   |       scenario_analysis.py
 |   |       scenario_insights.md
+|   |
+|   +---sensitivity
+|   |   |   sensitivity_analysis.py
+|   |   |   sensitivity_findings.md
+|   |   |
+|   |   \---outputs
+|   |           sensitivity_heatmap.png
+|   |           sensitivity_spider.png
+|   |           sensitivity_tornado.png
 |   |
 |   +---sql
 |   |       advanced_analysis.sql
@@ -123,6 +133,7 @@ graph TD
     
     SCEN["Scenario Analysis<br/>(analysis/scenarios/)"]
     RISK["Risk Simulation<br/>(analysis/risk/)"]
+    SENS["Sensitivity Analysis<br/>(analysis/sensitivity/)"]
     
     REPORT["Reporting & Outputs"]
 
@@ -139,11 +150,14 @@ graph TD
     FC --> RISK
     CLEAN --> RISK
     
+    %% Sensitivity Dependencies
+    RISK --> SENS
+    SCEN --> SENS
+    
     %% Reporting
     SQL --> REPORT
     TS --> REPORT
-    SCEN --> REPORT
-    RISK --> REPORT
+    SENS --> REPORT
 
 ```
 
@@ -158,6 +172,7 @@ graph TD
 4. **Strategic Layer:**
 * **Scenarios:** Uses Forecasts + Features to simulate market conditions.
 * **Risk (Week 7):** Uses Forecasts + Features to run Monte Carlo simulations for probability scoring.
+* **Sensitivity (Week 8):** Perturbs inputs from Scenarios and Risk to test model robustness and identify key drivers.
 
 
 
@@ -177,6 +192,7 @@ graph TD
 <br>`inventory_features.csv` | `product_risk_scores.csv`<br>
 
 <br>`risk_assessment_report.md` |
+| **Sensitivity (Week 8)** | `sensitivity_analysis.py` | `run_sensitivity_analysis` | `data dict` containing sales, inventory, scenarios, risk | `data["sensitivity_results"]`, `data["sensitivity_ranking"]`, `sensitivity_findings.md`, `outputs/sensitivity_*.png` |
 
 ---
 
@@ -188,43 +204,44 @@ graph TD
 | --- | --- | --- | --- |
 | `product_id` | `int` | Raw | Unique identifier for products. |
 | `transaction_date` | `date` | Raw | Date of sale or inventory snapshot. |
-| `quantity` | `int` | Raw | Units sold or held in stock (Must be ). |
+| `quantity` | `int` | Raw | Units sold or held in stock (Must be >= 0). |
 | `stock_ratio` | `float` | Features | Ratio of current inventory to daily sales average. |
 | `trend_slope` | `float` | Time Series | Rate of change in sales (Linear Regression slope). |
 | `forecast_quantity` | `float` | Forecast | Predicted sales volume for a specific future date. |
 | `risk_score` | `float` | Risk | Normalized score (0.0–1.0) indicating stockout probability. |
 | `var_95` | `float` | Risk | **Value at Risk (95%)**: Worst-case profit loss threshold. |
-| `ci_lower` / `ci_upper` | `float` | Risk | 95% Confidence Interval bounds for expected profit. |
+| `sensitivity_results` | `DataFrame` | Sensitivity Layer | Delta metrics per input variable (OAT perturbation). |
+| `sensitivity_ranking` | `Series` | Sensitivity Layer | Normalized sensitivity score per variable. |
 
 ### 4.2 Master Formulas Table
 
 | Metric | Formula Logic | Step-by-Step Numerical Example |
 | --- | --- | --- |
-| **Stock Ratio** |  | **Given:** Inventory = 500 units, Avg Daily Sales = 25 units.<br>
+| **Stock Ratio** | `Inventory / Avg_Daily_Sales` | **Given:** Inventory = 500 units, Avg Daily Sales = 25 units.<br>
 
-<br>**Calc:** .<br>
+<br>**Calc:** `500 / 25`.<br>
 
 <br>**Result:** **20.0** (Days of Inventory Cover). |
-| **Trend Slope** | Linear Regression ().<br>
+| **Trend Slope** | Linear Regression (`y = mx + c`).<br>
 
-<br> represents the slope. | **Given:** Sales over 3 days = [100, 105, 110].<br>
+<br>`m` represents the slope. | **Given:** Sales over 3 days = [100, 105, 110].<br>
 
-<br>**Calc:** Rise (10) / Run (2 days)  5.<br>
+<br>**Calc:** Rise (10) / Run (2 days) = 5.<br>
 
 <br>**Result:** **+5.0** (Strong Uptrend). |
-| **Projected Sales** |  | **Given:** Forecast Demand = 120, Available Stock = 100.<br>
+| **Projected Sales** | `Min(Forecast, Stock)` | **Given:** Forecast Demand = 120, Available Stock = 100.<br>
 
-<br>**Calc:** .<br>
+<br>**Calc:** `Min(120, 100)`.<br>
 
 <br>**Result:** **100** units (Lost sales = 20). |
-| **Remaining Stock** |  | **Given:** Stock = 100, Supply Added = 50, Sales = 100.<br>
+| **Remaining Stock** | `Stock + Supply - Sales` | **Given:** Stock = 100, Supply Added = 50, Sales = 100.<br>
 
-<br>**Calc:** .<br>
+<br>**Calc:** `100 + 50 - 100`.<br>
 
 <br>**Result:** **50** units remaining. |
-| **Expected Profit** |  | **Given:** Sold=100, Price=$20, Cost=$10, Holding=$50.<br>
+| **Expected Profit** | `(Price - Cost) * Sales - Holding_Cost` | **Given:** Sold=100, Price=$20, Cost=$10, Holding=$50.<br>
 
-<br>**Calc:** .<br>
+<br>**Calc:** `(10*100) - 50`.<br>
 
 <br>**Result:** **$950**. |
 
@@ -288,13 +305,11 @@ graph TD
 
 * **Goal:** Monte Carlo simulation for risk scoring.
 * **Script:** `analysis/risk/risk_simulation.py`
-* **Inputs:**
-* `analysis/forecast/forecast_results.csv`
+* **Inputs:** * `analysis/forecast/forecast_results.csv`
 * `data/processed/inventory_features.csv`
 
 
-* **Outputs:**
-* `analysis/risk/product_risk_scores.csv`
+* **Outputs:** * `analysis/risk/product_risk_scores.csv`
 * `analysis/risk/risk_assessment_report.md`
 
 
@@ -303,6 +318,25 @@ graph TD
 * [ ] **Metrics:** `var_95` is calculated for all items.
 * [ ] **Range Check:** `risk_score` is normalized between 0.0 and 1.0.
 * [ ] **Reporting:** Markdown report correctly identifies High Risk products.
+
+
+
+### 5.7 Sensitivity Analysis (Week 8)
+
+* **Goal:** Evaluate model robustness by perturbing input variables (OAT ±20%) to determine sensitivity of KPIs (Expected Profit, Remaining Stock, Total Revenue).
+* **Inputs:** `data dict` with `sales`, `inventory`, `scenarios`, risk scores from Week 7.
+* **Outputs:**
+* `data["sensitivity_results"]` → DataFrame with delta metrics per variable
+* `data["sensitivity_ranking"]` → normalized sensitivity scores
+* `sensitivity_findings.md` → Executive Summary + Impact Ranking + Technical Notes
+* `outputs/sensitivity_tornado.png`, `outputs/sensitivity_spider.png`, `outputs/sensitivity_heatmap.png`
+
+
+* **QA Checklist:**
+* [ ] **Script executes without errors**
+* [ ] **Sensitivity scores are normalized (0–1)**
+* [ ] **Tornado, Radar, and Heatmap images are generated**
+* [ ] **Markdown report contains baseline KPIs, top drivers, and key risks**
 
 
 
@@ -328,7 +362,7 @@ graph TD
 
 ## 7. Extensibility Guide
 
-### 7.1 Adding Machine Learning (Week 8+)
+### 7.1 Adding Machine Learning (Week 9+)
 
 1. Create `analysis/ml_model/predictive_model.py`.
 2. Inputs: `inventory_features.csv` + `forecast_results.csv`.
@@ -341,4 +375,4 @@ graph TD
 
 ---
 
-*End of Comprehensive Reference Manual v3.2*
+*End of Comprehensive Reference Manual v3.3*

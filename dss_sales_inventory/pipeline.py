@@ -3,6 +3,17 @@ import logging
 import sys
 from pathlib import Path
 
+# ========================
+# Path Setup (Fix for Import Issues)
+# ========================
+# Dynamically add the project root to sys.path to ensure modules can be imported
+project_root = Path(__file__).resolve().parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# ========================
+# Imports
+# ========================
 from ingestion.ingestion import run_ingestion
 from cleaning.cleaning import run_cleaning
 from features.features import run_features
@@ -22,6 +33,9 @@ from analysis.scenarios.scenario_analysis import run_scenario_analysis
 
 # Risk Simulation Layer (Week 7)
 from analysis.risk.risk_simulation import run_risk_simulation
+
+# Sensitivity Analysis Layer (Week 8)
+from analysis.sensitivity.sensitivity_analysis import run_sensitivity_analysis
 
 
 # ========================
@@ -77,6 +91,7 @@ if __name__ == "__main__":
                 "status": "STARTED"
             }
         )
+        # Ingestion returns the initial raw dataframe
         data = run_ingestion(correlation_id)
         dss_logger.info(
             "Ingestion stage completed",
@@ -104,6 +119,7 @@ if __name__ == "__main__":
                 "status": "STARTED"
             }
         )
+        # Cleaning processes the dataframe
         data = run_cleaning(data, correlation_id)
         dss_logger.info(
             "Cleaning stage completed",
@@ -131,7 +147,17 @@ if __name__ == "__main__":
                 "status": "STARTED"
             }
         )
+        
+        # run_features now returns a dictionary: {'sales': df, 'inventory': df}
         data = run_features(data, correlation_id)
+        
+        # Verify structure for logging purposes (optional validation)
+        if isinstance(data, dict) and 'sales' in data and 'inventory' in data:
+            sales_shape = data['sales'].shape
+            inv_shape = data['inventory'].shape
+            dss_logger.info(f"Features split created - Sales: {sales_shape}, Inventory: {inv_shape}",
+                            extra={"run_id": correlation_id, "stage": "FEATURES", "function": "run_features", "rows_in": None, "rows_out": None, "status": "INFO"})
+
         dss_logger.info(
             "Features stage completed",
             extra={
@@ -158,7 +184,9 @@ if __name__ == "__main__":
                 "status": "STARTED"
             }
         )
+        # Passing the dictionary containing 'sales' and 'inventory'
         run_analysis(data, correlation_id)
+        
         dss_logger.info(
             "Analysis stage completed",
             extra={
@@ -213,8 +241,8 @@ if __name__ == "__main__":
             }
         )
 
-        # FIX: Pass only root_dir
-        ROOT_DIR = r"C:\Data_Analysis\dss_sales_inventory"
+        # Using dynamic path for root_dir based on script location
+        ROOT_DIR = str(Path(__file__).resolve().parent)
         run_time_series_analysis(root_dir=ROOT_DIR)
 
         dss_logger.info(
@@ -270,7 +298,8 @@ if __name__ == "__main__":
                 "status": "STARTED"
             }
         )
-        run_scenario_analysis(correlation_id)
+        scenarios_df = run_scenario_analysis(correlation_id)
+        data["scenarios"] = scenarios_df
         dss_logger.info(
             "Scenario Analysis stage completed",
             extra={
@@ -284,7 +313,7 @@ if __name__ == "__main__":
         )
 
         # ========================
-        # Stage 9: Risk Simulation Layer (Week 7)
+        # Stage 9: Risk Simulation Layer (MOVED BEFORE SENSITIVITY)
         # ========================
         dss_logger.info(
             "Risk Simulation stage started",
@@ -304,6 +333,37 @@ if __name__ == "__main__":
                 "run_id": correlation_id,
                 "stage": "RISK_SIMULATION",
                 "function": "run_risk_simulation",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage 10: Sensitivity Analysis Layer (Week 8)
+        # ========================
+        dss_logger.info(
+            "Sensitivity Analysis stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SENSITIVITY_ANALYSIS",
+                "function": "run_sensitivity_analysis",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+
+        # Execute Sensitivity Analysis
+        # Ensure run_sensitivity_analysis handles data['sales'] and data['inventory'] internally
+        data = run_sensitivity_analysis(data, correlation_id)
+        
+        dss_logger.info(
+            "Sensitivity Analysis stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "SENSITIVITY_ANALYSIS",
+                "function": "run_sensitivity_analysis",
                 "rows_in": None,
                 "rows_out": None,
                 "status": "SUCCESS"
