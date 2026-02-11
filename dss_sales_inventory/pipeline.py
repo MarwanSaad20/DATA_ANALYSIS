@@ -37,6 +37,9 @@ from analysis.risk.risk_simulation import run_risk_simulation
 # Sensitivity Analysis Layer (Week 8)
 from analysis.sensitivity.sensitivity_analysis import run_sensitivity_analysis
 
+# KPI Layer (Week 9)
+from analysis.kpis.kpi_definitions import run_kpi_layer
+
 
 # ========================
 # Logger configuration
@@ -333,6 +336,33 @@ if __name__ == "__main__":
                 "run_id": correlation_id,
                 "stage": "RISK_SIMULATION",
                 "function": "run_risk_simulation",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage 10: KPI Layer (Week 9)
+        # ========================
+        dss_logger.info(
+            "KPI Layer stage started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "KPIS",
+                "function": "run_kpi_layer",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+        data = run_kpi_layer(data, correlation_id)
+        dss_logger.info(
+            "KPI Layer stage completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "KPIS",
+                "function": "run_kpi_layer",
                 "rows_in": None,
                 "rows_out": None,
                 "status": "SUCCESS"
