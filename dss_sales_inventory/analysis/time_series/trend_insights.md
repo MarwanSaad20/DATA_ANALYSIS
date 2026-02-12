@@ -1,6 +1,6 @@
 # Time Series Trend Insights Report
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-02-12
 **Metric:** avg_daily_sales
 **Rolling Window:** 7 periods
 

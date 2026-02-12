@@ -1,6 +1,6 @@
 # Sensitivity Analysis Report
 
-**Date:** 2026-02-11 19:36
+**Date:** 2026-02-12 21:20
 **Methodology:** OAT Perturbation (±20%)
 
 ## 1. Executive Summary

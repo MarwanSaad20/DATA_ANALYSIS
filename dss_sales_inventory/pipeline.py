@@ -19,6 +19,10 @@ from cleaning.cleaning import run_cleaning
 from features.features import run_features
 from analysis.analysis import run_analysis
 
+# Star Schema Layer (Week 10 - New Addition)
+# يفترض أن build_star_schema يحتوي على دالة main تقبل (data_dict, correlation_id)
+from data_model.build_star_schema import main as run_star_schema
+
 # SQL analytics layer
 from analysis.run_sql_layer import main as run_sql_layer
 
@@ -167,6 +171,37 @@ if __name__ == "__main__":
                 "run_id": correlation_id,
                 "stage": "FEATURES",
                 "function": "run_features",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "SUCCESS"
+            }
+        )
+
+        # ========================
+        # Stage: Star Schema Layer (New Addition)
+        # ========================
+        dss_logger.info(
+            "Star Schema Layer started",
+            extra={
+                "run_id": correlation_id,
+                "stage": "STAR_SCHEMA",
+                "function": "run_star_schema",
+                "rows_in": None,
+                "rows_out": None,
+                "status": "STARTED"
+            }
+        )
+        
+        # Pass the data dictionary (from Features) and correlation_id
+        # This function builds the dimensions/facts and loads them into SQLite
+        run_star_schema(data, correlation_id)
+
+        dss_logger.info(
+            "Star Schema Layer completed",
+            extra={
+                "run_id": correlation_id,
+                "stage": "STAR_SCHEMA",
+                "function": "run_star_schema",
                 "rows_in": None,
                 "rows_out": None,
                 "status": "SUCCESS"
@@ -370,7 +405,7 @@ if __name__ == "__main__":
         )
 
         # ========================
-        # Stage 10: Sensitivity Analysis Layer (Week 8)
+        # Stage 11: Sensitivity Analysis Layer (Week 8)
         # ========================
         dss_logger.info(
             "Sensitivity Analysis stage started",
