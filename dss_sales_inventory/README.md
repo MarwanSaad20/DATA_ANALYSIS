@@ -1,10 +1,11 @@
+```markdown
 # Decision Support System (DSS): Comprehensive Reference Manual
 
 | **Document Meta** | **Details** |
 | --- | --- |
-| **Version** | **3.5** (Final Production Release) |
-| **Last Updated** | **February 12, 2026** |
-| **Status** | **Production Ready** (Modules 1–10 Implemented) |
+| **Version** | **3.6** (Final Production Release) |
+| **Last Updated** | **February 19, 2026** |
+| **Status** | **Production Ready** (Modules 1–11 Implemented) |
 | **Root Directory** | `C:\Data_Analysis\dss_sales_inventory\` |
 | **Target Audience** | Data Engineers, AI Agents, System Architects |
 
@@ -22,7 +23,8 @@
 | **3.2** | Feb 2026 | AI Architect | **Synchronization:** Verified paths, QA checklists, and pipeline logic. |
 | **3.3** | Feb 2026 | AI Architect | Added **Sensitivity Analysis Layer (Week 8)** including outputs, visualizations, pipeline integration, and QA checklist. |
 | **3.4** | Feb 2026 | AI Architect | Added **KPI Layer (Week 9)** including outputs, decision flags, top products, and QA checklist. |
-| **3.5** | **Feb 2026** | **AI Architect** | **Added Data Modeling Layer (Week 10): Star Schema implementation, Surrogate Keys, Grain Protection, and native ERD generation.** |
+| **3.5** | Feb 2026 | AI Architect | **Added Data Modeling Layer (Week 10): Star Schema implementation, Surrogate Keys, Grain Protection, and native ERD generation.** |
+| **3.6** | Feb 2026 | AI Architect | **Added Week 11 – Dashboard Initialization: Interactive Python/Streamlit dashboard displaying executive KPIs and risk metrics.** |
 
 ---
 
@@ -35,7 +37,7 @@ The Decision Support System (DSS) is a modular analytics engine designed to inge
 1. **Dict-Passing Architecture:** State is managed by passing a Python dictionary (`data = {'sales': df, 'inventory': df}`) between functions, ensuring statelessness and high testability.
 2. **Traceability:** A unique `correlation_id` (UUID) is generated at the pipeline's initialization and propagated through every log entry and transformation step (See **Section 6.1** for Logging Standards).
 3. **Immutability:** Raw data in `data/raw` is read-only. All transformations result in new artifacts stored in `data/processed` or `analysis/`.
-4. **Modularity:** Each analytical stage (SQL, Time Series, Forecast, Scenarios, Risk, Sensitivity, KPI, Data Model) functions as an independent unit.
+4. **Modularity:** Each analytical stage (SQL, Time Series, Forecast, Scenarios, Risk, Sensitivity, KPI, Data Model, Dashboard) functions as an independent unit.
 
 ### 2.2 Project Directory Tree
 
@@ -114,14 +116,16 @@ C:\DATA_ANALYSIS\DSS_SALES_INVENTORY
 |       ingestion.py
 |
 \---reporting
-    \---outputs
-        |   analysis_summary.csv
-        |   inventory_status_view.csv
-        |
-        \---plots                   # Visualization Images
-                trend_daily_revenue.png
-                combined_all_products_trend.png
-
+    |   analysis_summary.csv
+    |   inventory_status_view.csv
+    |
+    +---outputs
+    |   \---plots                   # Visualization Images
+    |           trend_daily_revenue.png
+    |           combined_all_products_trend.png
+    |
+    \---python_dash                  # [Week 11 New Module]
+            initial_dashboard.py     # Streamlit dashboard
 ```
 
 ---
@@ -148,6 +152,8 @@ graph TD
     SENS["Sensitivity Analysis<br/>(analysis/sensitivity/)"]
     KPI["KPI Layer<br/>(analysis/kpis/)"]
     
+    DASH["Executive Dashboard<br/>(Streamlit)"]
+
     REPORT["Reporting & Outputs"]
 
     %% Flow
@@ -172,12 +178,15 @@ graph TD
     FC --> KPI
     RISK --> KPI
     
+    %% Dashboard Consumption
+    MODEL --> DASH
+    KPI --> DASH
+    RISK --> DASH
+
     %% Reporting
-    MODEL --> REPORT
     TS --> REPORT
     SENS --> REPORT
-    KPI --> REPORT
-
+    DASH --> REPORT
 ```
 
 1. **Ingestion & Cleaning:** Loads raw CSVs, sanitizes types, and fills nulls.
@@ -185,12 +194,11 @@ graph TD
 3. **Data Modeling (Week 10):** Transforms flat files into a normalized Star Schema (Facts & Dimensions) in SQLite.
 4. **Analytical Branching:** Data flows in parallel to Time Series and Forecast.
 5. **Strategic Layer:**
-* **Scenarios:** Simulates market conditions.
-* **Risk:** Monte Carlo simulations.
-* **Sensitivity:** Perturbs inputs to test robustness.
-* **KPI Layer:** Aggregates Inventory, Forecast, and Risk data to generate final executive decision flags.
-
-
+   * **Scenarios:** Simulates market conditions.
+   * **Risk:** Monte Carlo simulations.
+   * **Sensitivity:** Perturbs inputs to test robustness.
+   * **KPI Layer:** Aggregates Inventory, Forecast, and Risk data to generate final executive decision flags.
+6. **Dashboard Initialization (Week 11):** Serves interactive visualizations and KPIs directly from the Star Schema and KPI outputs.
 
 ### 3.2 Module Summary Table
 
@@ -203,17 +211,10 @@ graph TD
 | **Time Series** | `time_series_analysis.py` | `detect_trend` | Daily Sales | `trend_insights.md` |
 | **Forecast** | `short_term_forecast.py` | `predict_demand` | Time Series Data | `analysis/forecast/forecast_results.csv` |
 | **Scenarios** | `scenario_analysis.py` | `simulate_scenario` | Forecasts, Inventory | `scenarios_comparison.xlsx` |
-| **Risk (Week 7)** | `risk_simulation.py` | `run_monte_carlo` | `forecast_results.csv`<br>
-
-<br>`inventory_features.csv` | `product_risk_scores.csv`<br>
-
-<br>`risk_assessment_report.md` |
+| **Risk (Week 7)** | `risk_simulation.py` | `run_monte_carlo` | `forecast_results.csv`<br><br>`inventory_features.csv` | `product_risk_scores.csv`<br><br>`risk_assessment_report.md` |
 | **Sensitivity (Week 8)** | `sensitivity_analysis.py` | `run_sensitivity_analysis` | `data dict` (sales, inv, risk) | `sensitivity_findings.md`, `outputs/sensitivity_*.png` |
-| **KPI Layer (Week 9)** | `analysis/kpis/kpi_definitions.py` | `run_kpi_layer` | `forecast_results.csv`<br>
-
-<br>`product_risk_scores.csv` | `analysis/kpis/product_kpis.csv`<br>
-
-<br>`analysis/kpis/kpi_documentation.md` |
+| **KPI Layer (Week 9)** | `analysis/kpis/kpi_definitions.py` | `run_kpi_layer` | `forecast_results.csv`<br><br>`product_risk_scores.csv` | `analysis/kpis/product_kpis.csv`<br><br>`analysis/kpis/kpi_documentation.md` |
+| **Executive Dashboard (Week 11)** | `reporting/python_dash/initial_dashboard.py` | `fetch_and_preprocess_data()`, `compute_portfolio_metrics()`, `compute_financial_kpis()`, `build_visualizations()`, `build_gauge()` | `analytics.db` (Star Schema)<br><br>`product_kpis.csv`<br><br>`product_risk_scores.csv` | Interactive Streamlit dashboard with Trend, Bar, Scatter charts, Gauge visualization, KPI summary cards |
 
 ---
 
@@ -246,95 +247,102 @@ graph TD
 
 * **Goal:** Ensure data hygiene.
 * **QA Checklist:**
-* [ ] File Existence: `data/raw/sales.csv` and `data/raw/inventory.csv` are present.
-* [ ] Schema Check: `product_id` is Integer.
-
-
+  * [ ] File Existence: `data/raw/sales.csv` and `data/raw/inventory.csv` are present.
+  * [ ] Schema Check: `product_id` is Integer.
 
 ### 5.2 SQL Decision Layer (Weeks 2-3)
 
 * **Goal:** Operational reporting.
 * **QA Checklist:**
-* [ ] View Generation: `inventory_status_view.csv` created.
-
-
+  * [ ] View Generation: `inventory_status_view.csv` created.
 
 ### 5.3 Time Series Analysis (Week 4)
 
 * **Goal:** Trend detection.
 * **QA Checklist:**
-* [ ] Plot Generation: `reporting/plots/` contains `.png` files.
-
-
+  * [ ] Plot Generation: `reporting/plots/` contains `.png` files.
 
 ### 5.4 Short-Term Forecast (Week 5)
 
 * **Goal:** 28-day demand prediction.
 * **QA Checklist:**
-* [ ] File Path: Output exists at `analysis/forecast/forecast_results.csv`.
-* [ ] Sanity Check: No negative forecasts.
-
-
+  * [ ] File Path: Output exists at `analysis/forecast/forecast_results.csv`.
+  * [ ] Sanity Check: No negative forecasts.
 
 ### 5.5 Scenario Analysis (Week 6)
 
 * **Goal:** "What-if" simulations.
 * **QA Checklist:**
-* [ ] Formatting: `scenarios_comparison.xlsx` is readable.
-
-
+  * [ ] Formatting: `scenarios_comparison.xlsx` is readable.
 
 ### 5.6 Probabilistic Risk Simulation (Week 7)
 
 * **Goal:** Monte Carlo simulation for risk scoring.
 * **QA Checklist:**
-* [ ] Range Check: `risk_score` is normalized between 0.0 and 1.0.
-
-
+  * [ ] Range Check: `risk_score` is normalized between 0.0 and 1.0.
 
 ### 5.7 Sensitivity Analysis (Week 8)
 
 * **Goal:** Evaluate model robustness via OAT perturbation.
 * **QA Checklist:**
-* [ ] Sensitivity scores are normalized (0–1).
-* [ ] Tornado, Radar, and Heatmap images are generated.
-
-
+  * [ ] Sensitivity scores are normalized (0–1).
+  * [ ] Tornado, Radar, and Heatmap images are generated.
 
 ### 5.8 KPI Layer (Week 9)
 
 * **Goal:** Aggregate insights into executive decision flags.
 * **QA Checklist:**
-* [ ] **Execution:** Script executes successfully.
-* [ ] **Validation:** KPI values are within 0-100 range.
-* [ ] **Logic:** Decision flags correctly identify high risk/pressure items.
-
-
+  * [ ] **Execution:** Script executes successfully.
+  * [ ] **Validation:** KPI values are within 0-100 range.
+  * [ ] **Logic:** Decision flags correctly identify high risk/pressure items.
 
 ### 5.9 Data Modeling Layer (Week 10)
 
 * **Goal:** Implement a strict **Star Schema** to formalize relationships and protect analytical grain.
 * **Primary Script:** `data_model/star_schema_builder.py` (aka `Week10.py`)
 * **Core Components:**
-1. **Dimension Building:** Creates `dim_date`, `dim_product`, `dim_region` with explicit Surrogate Keys (SK).
-2. **Fact Construction:** Aggregates `fact_sales` to the Grain: (Product x Date x Region).
-3. **Grain Protection:** Enforces uniqueness on the composite grain key.
-4. **Referential Integrity (RI):** Validates that every Fact FK exists in the corresponding Dimension.
-5. **Visualization:** Generates an Entity Relationship Diagram (ERD) using `PIL` (no external graphviz dependency).
-
-
+  1. **Dimension Building:** Creates `dim_date`, `dim_product`, `dim_region` with explicit Surrogate Keys (SK).
+  2. **Fact Construction:** Aggregates `fact_sales` to the Grain: (Product x Date x Region).
+  3. **Grain Protection:** Enforces uniqueness on the composite grain key.
+  4. **Referential Integrity (RI):** Validates that every Fact FK exists in the corresponding Dimension.
+  5. **Visualization:** Generates an Entity Relationship Diagram (ERD) using `PIL` (no external graphviz dependency).
 * **Outputs:**
-* **Database:** `analysis/analytics.db` (SQLite) containing populated tables.
-* **Diagram:** `data_model/erd_diagram.png` (Star Schema visualization).
-
-
+  * **Database:** `analysis/analytics.db` (SQLite) containing populated tables.
+  * **Diagram:** `data_model/erd_diagram.png` (Star Schema visualization).
 * **QA Checklist:**
-* [ ] **Grain Validation:** No duplicate rows for `(product_id, date_id, region_id)` in Fact table.
-* [ ] **RI Check:** No `NULL` Foreign Keys in Fact table.
-* [ ] **Surrogate Keys:** All Dimensions utilize generated IDs (e.g., `date_id` > 1000).
-* [ ] **Visualization:** `erd_diagram.png` is created and clearly shows the center Fact table surrounded by Dimensions.
+  * [ ] **Grain Validation:** No duplicate rows for `(product_id, date_id, region_id)` in Fact table.
+  * [ ] **RI Check:** No `NULL` Foreign Keys in Fact table.
+  * [ ] **Surrogate Keys:** All Dimensions utilize generated IDs (e.g., `date_id` > 1000).
+  * [ ] **Visualization:** `erd_diagram.png` is created and clearly shows the center Fact table surrounded by Dimensions.
 
+### 5.10 Dashboard Initialization (Week 11)
 
+* **Goal:** Provide real-time, interactive executive dashboard without PowerBI.
+* **Primary Script:** `reporting/python_dash/initial_dashboard.py`
+* **Functionality:**
+  * Fetch and merge data from Star Schema (`fact_sales` + `dim_product` / `dim_date` / `dim_region`).
+  * Compute portfolio-level metrics and per-product KPIs.
+  * Interactive filters: Product, Region, Year, Quarter, Month.
+  * Visualizations:
+    * **Trend line** (e.g., revenue over time)
+    * **Bar chart** (e.g., top products by profit)
+    * **Decision matrix (Scatter)** (e.g., risk vs. profit)
+    * **Risk Gauge** (portfolio average or selected product risk)
+  * KPI cards:
+    * Total Revenue
+    * Total Cost
+    * Total Profit
+    * Portfolio Average Inventory Risk Score
+    * Portfolio Average Profitability Margin
+* **SQL:** Select queries from fact and dimension tables.
+* **Assumptions:** KPIs already computed and present in `analytics.db` (via `product_kpis.csv` and `product_risk_scores.csv`).
+* **Limitations:** Dashboard reflects only current database state.
+* **QA Checklist:**
+  * [ ] Dashboard loads without errors.
+  * [ ] Filters update all charts dynamically.
+  * [ ] Gauge updates according to selected product or portfolio average.
+  * [ ] KPI summary cards display correct totals.
+  * [ ] Visualizations match filtered data.
 
 ---
 
@@ -354,7 +362,9 @@ graph TD
 | `GrainViolationError` | **Critical** | Duplicate facts found. | Check aggregation logic in Data Model. |
 | `InsufficientDataError` | **Warning** | History < 14 days. | Log warning, skip product, continue. |
 | `MissingForecastDataError` | **Critical** | Missing `forecast_results.csv`. | Run `short_term_forecast.py` first. |
+| `DashboardConnectionError` | **Warning** | Streamlit cannot bind to port. | Check port availability or restart dashboard. |
 
 ---
 
-*End of Comprehensive Reference Manual v3.5*
+*End of Comprehensive Reference Manual v3.6*
+```
