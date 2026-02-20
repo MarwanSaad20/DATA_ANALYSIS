@@ -3,9 +3,9 @@
 
 | **Document Meta** | **Details** |
 | --- | --- |
-| **Version** | **3.6** (Final Production Release) |
-| **Last Updated** | **February 19, 2026** |
-| **Status** | **Production Ready** (Modules 1–11 Implemented) |
+| **Version** | **3.7** (Final Production Release) |
+| **Last Updated** | **February 20, 2026** |
+| **Status** | **Production Ready** (Modules 1–12 Implemented) |
 | **Root Directory** | `C:\Data_Analysis\dss_sales_inventory\` |
 | **Target Audience** | Data Engineers, AI Agents, System Architects |
 
@@ -25,6 +25,7 @@
 | **3.4** | Feb 2026 | AI Architect | Added **KPI Layer (Week 9)** including outputs, decision flags, top products, and QA checklist. |
 | **3.5** | Feb 2026 | AI Architect | **Added Data Modeling Layer (Week 10): Star Schema implementation, Surrogate Keys, Grain Protection, and native ERD generation.** |
 | **3.6** | Feb 2026 | AI Architect | **Added Week 11 – Dashboard Initialization: Interactive Python/Streamlit dashboard displaying executive KPIs and risk metrics.** |
+| **3.7** | Feb 20, 2026 | AI Architect | Added Week 12 – Dashboard Enhancement: Advanced Time Intelligence, Rolling Average, Cumulative Revenue, MoM Growth, dynamic filters, and improved executive decision analytics. |
 
 ---
 
@@ -124,8 +125,9 @@ C:\DATA_ANALYSIS\DSS_SALES_INVENTORY
     |           trend_daily_revenue.png
     |           combined_all_products_trend.png
     |
-    \---python_dash                  # [Week 11 New Module]
-            initial_dashboard.py     # Streamlit dashboard
+    \---python_dash                  # [Week 11-12 Dashboard Module]
+            initial_dashboard.py     # Week 11: Initial Dashboard
+            enhanced_dashboard.py    # Week 12: Enhanced Time Intelligence Dashboard
 ```
 
 ---
@@ -152,7 +154,7 @@ graph TD
     SENS["Sensitivity Analysis<br/>(analysis/sensitivity/)"]
     KPI["KPI Layer<br/>(analysis/kpis/)"]
     
-    DASH["Executive Dashboard<br/>(Streamlit)"]
+    DASH["Enhanced Time Intelligence Dashboard<br/>(Streamlit – Week 12)"]
 
     REPORT["Reporting & Outputs"]
 
@@ -198,7 +200,7 @@ graph TD
    * **Risk:** Monte Carlo simulations.
    * **Sensitivity:** Perturbs inputs to test robustness.
    * **KPI Layer:** Aggregates Inventory, Forecast, and Risk data to generate final executive decision flags.
-6. **Dashboard Initialization (Week 11):** Serves interactive visualizations and KPIs directly from the Star Schema and KPI outputs.
+6. **Enhanced Dashboard (Week 12):** Advanced time intelligence visualizations served interactively via Streamlit, consuming the Star Schema and KPI/Risk outputs.
 
 ### 3.2 Module Summary Table
 
@@ -211,10 +213,11 @@ graph TD
 | **Time Series** | `time_series_analysis.py` | `detect_trend` | Daily Sales | `trend_insights.md` |
 | **Forecast** | `short_term_forecast.py` | `predict_demand` | Time Series Data | `analysis/forecast/forecast_results.csv` |
 | **Scenarios** | `scenario_analysis.py` | `simulate_scenario` | Forecasts, Inventory | `scenarios_comparison.xlsx` |
-| **Risk (Week 7)** | `risk_simulation.py` | `run_monte_carlo` | `forecast_results.csv`<br><br>`inventory_features.csv` | `product_risk_scores.csv`<br><br>`risk_assessment_report.md` |
+| **Risk (Week 7)** | `risk_simulation.py` | `run_monte_carlo` | `forecast_results.csv`<br>`inventory_features.csv` | `product_risk_scores.csv`<br>`risk_assessment_report.md` |
 | **Sensitivity (Week 8)** | `sensitivity_analysis.py` | `run_sensitivity_analysis` | `data dict` (sales, inv, risk) | `sensitivity_findings.md`, `outputs/sensitivity_*.png` |
-| **KPI Layer (Week 9)** | `analysis/kpis/kpi_definitions.py` | `run_kpi_layer` | `forecast_results.csv`<br><br>`product_risk_scores.csv` | `analysis/kpis/product_kpis.csv`<br><br>`analysis/kpis/kpi_documentation.md` |
-| **Executive Dashboard (Week 11)** | `reporting/python_dash/initial_dashboard.py` | `fetch_and_preprocess_data()`, `compute_portfolio_metrics()`, `compute_financial_kpis()`, `build_visualizations()`, `build_gauge()` | `analytics.db` (Star Schema)<br><br>`product_kpis.csv`<br><br>`product_risk_scores.csv` | Interactive Streamlit dashboard with Trend, Bar, Scatter charts, Gauge visualization, KPI summary cards |
+| **KPI Layer (Week 9)** | `analysis/kpis/kpi_definitions.py` | `run_kpi_layer` | `forecast_results.csv`<br>`product_risk_scores.csv` | `analysis/kpis/product_kpis.csv`<br>`analysis/kpis/kpi_documentation.md` |
+| **Executive Dashboard (Week 11)** | `reporting/python_dash/initial_dashboard.py` | `fetch_and_preprocess_data()`, `compute_portfolio_metrics()`, `compute_financial_kpis()`, `build_visualizations()`, `build_gauge()` | `analytics.db` (Star Schema)<br>`product_kpis.csv`<br>`product_risk_scores.csv` | Interactive Streamlit dashboard with Trend, Bar, Scatter charts, Gauge visualization, KPI summary cards |
+| **Time Intelligence Dashboard Enhancement (Week 12)** | `reporting/python_dash/enhanced_dashboard.py` | `load_sales_time_series()`, `fill_missing_dates()`, `compute_rolling_avg()`, `compute_cumulative_revenue()`, `calculate_mom_growth()`, `prepare_time_charts()`, `main()` | `analytics.db`, `product_kpis.csv`, `product_risk_scores.csv` | All interactive visualizations (Rolling Average, Cumulative Revenue, MoM Growth), dynamic filters for products and regions, analytical notes for executive decision-making |
 
 ---
 
@@ -244,52 +247,44 @@ graph TD
 ## 5. Detailed Module Implementation & QA Checklists
 
 ### 5.1 Ingestion & Cleaning (Week 1)
-
 * **Goal:** Ensure data hygiene.
 * **QA Checklist:**
   * [ ] File Existence: `data/raw/sales.csv` and `data/raw/inventory.csv` are present.
   * [ ] Schema Check: `product_id` is Integer.
 
 ### 5.2 SQL Decision Layer (Weeks 2-3)
-
 * **Goal:** Operational reporting.
 * **QA Checklist:**
   * [ ] View Generation: `inventory_status_view.csv` created.
 
 ### 5.3 Time Series Analysis (Week 4)
-
 * **Goal:** Trend detection.
 * **QA Checklist:**
   * [ ] Plot Generation: `reporting/plots/` contains `.png` files.
 
 ### 5.4 Short-Term Forecast (Week 5)
-
 * **Goal:** 28-day demand prediction.
 * **QA Checklist:**
   * [ ] File Path: Output exists at `analysis/forecast/forecast_results.csv`.
   * [ ] Sanity Check: No negative forecasts.
 
 ### 5.5 Scenario Analysis (Week 6)
-
 * **Goal:** "What-if" simulations.
 * **QA Checklist:**
   * [ ] Formatting: `scenarios_comparison.xlsx` is readable.
 
 ### 5.6 Probabilistic Risk Simulation (Week 7)
-
 * **Goal:** Monte Carlo simulation for risk scoring.
 * **QA Checklist:**
   * [ ] Range Check: `risk_score` is normalized between 0.0 and 1.0.
 
 ### 5.7 Sensitivity Analysis (Week 8)
-
 * **Goal:** Evaluate model robustness via OAT perturbation.
 * **QA Checklist:**
   * [ ] Sensitivity scores are normalized (0–1).
   * [ ] Tornado, Radar, and Heatmap images are generated.
 
 ### 5.8 KPI Layer (Week 9)
-
 * **Goal:** Aggregate insights into executive decision flags.
 * **QA Checklist:**
   * [ ] **Execution:** Script executes successfully.
@@ -297,7 +292,6 @@ graph TD
   * [ ] **Logic:** Decision flags correctly identify high risk/pressure items.
 
 ### 5.9 Data Modeling Layer (Week 10)
-
 * **Goal:** Implement a strict **Star Schema** to formalize relationships and protect analytical grain.
 * **Primary Script:** `data_model/star_schema_builder.py` (aka `Week10.py`)
 * **Core Components:**
@@ -316,7 +310,6 @@ graph TD
   * [ ] **Visualization:** `erd_diagram.png` is created and clearly shows the center Fact table surrounded by Dimensions.
 
 ### 5.10 Dashboard Initialization (Week 11)
-
 * **Goal:** Provide real-time, interactive executive dashboard without PowerBI.
 * **Primary Script:** `reporting/python_dash/initial_dashboard.py`
 * **Functionality:**
@@ -344,12 +337,32 @@ graph TD
   * [ ] KPI summary cards display correct totals.
   * [ ] Visualizations match filtered data.
 
+### 5.11 Week 12 Dashboard Enhancement
+* **Goal:** Enhance the Week 11 dashboard with advanced time intelligence analyses.
+* **Primary Script:** `reporting/python_dash/enhanced_dashboard.py`
+* **Core Functions:**
+  * `load_sales_time_series()`
+  * `fill_missing_dates()`
+  * `compute_rolling_avg()`
+  * `compute_cumulative_revenue()`
+  * `calculate_mom_growth()`
+  * `prepare_time_charts()`
+  * `main()`
+* **Inputs:** `analytics.db`, `product_kpis.csv`, `product_risk_scores.csv`
+* **Outputs:** All interactive visualizations (Rolling Average, Cumulative Revenue, MoM Growth), with dynamic filters for products and regions, and analytical notes for executive decision-making.
+* **QA Checklist:**
+  * [ ] Dashboard loads without errors.
+  * [ ] Filters update all charts dynamically.
+  * [ ] Rolling Average & Cumulative charts display correctly.
+  * [ ] MoM Growth calculations and visualization are accurate.
+  * [ ] Analytical Notes section is present and accurate.
+  * [ ] Visualizations correctly reflect underlying data and selected filters.
+
 ---
 
 ## 6. Operational Protocols
 
 ### 6.1 Logging Standards
-
 * **Pattern:** `%(asctime)s - %(levelname)s - [Correlation ID] - %(message)s`
 * **Mandate:** Every function entry/exit and exception must be logged with the ID.
 
@@ -366,5 +379,5 @@ graph TD
 
 ---
 
-*End of Comprehensive Reference Manual v3.6*
+*End of Comprehensive Reference Manual v3.7*
 ```
