@@ -12,7 +12,8 @@ CSV_FOLDERS = [
     BASE_DIR / "data" / "processed",
     BASE_DIR / "analysis" / "forecast",
     BASE_DIR / "analysis" / "kpis",
-    BASE_DIR / "analysis" / "risk"
+    BASE_DIR / "analysis" / "risk",
+    BASE_DIR / "reporting"  # إضافة مجلد reporting
 ]
 
 SQLITE_DB = BASE_DIR / "analysis" / "analytics.db"
@@ -67,6 +68,7 @@ def scan_csv_sources():
     for folder in CSV_FOLDERS:
 
         if not folder.exists():
+            print(f"   Folder not found: {folder}")
             continue
 
         for file in folder.glob("*.csv"):
